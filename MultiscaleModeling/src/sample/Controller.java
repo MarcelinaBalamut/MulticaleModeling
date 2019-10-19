@@ -1,928 +1,398 @@
 package sample;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
-
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
-public class Controller {
-
-
-    @FXML
-    public ComboBox neighborhood;
-    public ComboBox random;
-    public ComboBox boundary;
-    public TextField radius;
-    public TextField pointsNumber;
-    public Button stop;
-    public Button ok;
+public class Controller implements Initializable {
     public TextField width;
     public TextField height;
-    Nb nb = new Nb();
-    @FXML
-    Canvas canvas = new Canvas();
+    public Canvas canvas;
+    public TextField embryCount;
+    public ComboBox boundary;
+    public ComboBox neighborhood;
+    public Button clear;
+    private GraphicsContext gc;
 
+    private int numberOfNucleon;
+    //private Set<Integer> rdCells = new HashSet<>();
+    private Set<Integer> randomCells = new HashSet<>();
+    public  String SEPARATOR = ";";
+    int TOP_PADDING = 30;
+    int SCALE = 2;
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
 
+        gc = canvas.getGraphicsContext2D();
+        numberOfNucleon = Integer.parseInt(embryCount.getText());
 
-int ileweszło = 0;
-    @FXML
-    Cell [][]cell;
+        boundary.getItems().addAll(
+                "Periodical"
+                // "Absorbing"
+        );
 
-    @FXML
-    Button rand;
-    @FXML
-    TextField embryCount = new TextField();
-    @FXML
-    TextField length = new TextField();
-    Timeline tl;
-
-    private int SIZEwidth;
-    private int SIZEheight;
-    private int EMBRYCOUNT;
-    private int neighborhoodType;
-    private int randomType;
-    private int boundaryType;
-    Map<Color, Integer> m;
-   // private  int pointsCount;
-    private  int radiusSize;
-    private boolean countWhite = false ;
-    GraphicsContext graphicsContext ;
-    private boolean stopClick =  false;
-    List <Cell> randomedCells = new ArrayList();
-    int points;
-    List<Point> list;
-    Runner runner;
-    boolean    conuntofEmpty;
-    public  void initialize(){
-
-        conuntofEmpty = true;
-        canvas.setWidth(750);
-        canvas.setHeight(750);
         neighborhood.getItems().addAll(
-               // "Moore",
-                "Von Neumann"
+                // "Moore",
+                "VonNeumann"
 //                "Heksagonal left",
 //                "Heksagonal right",
 //                "Random Heksagonal",
 //                "Random Pentagonal"
-               );
-
-//        random.getItems().addAll(
-//                "Random",
-//                "Evenly random",
-//                "In ray",
-//                "Mouse click"
-//
-//        );
-        boundary.getItems().addAll(
-                "Periodical"
-               // "Absorbing"
         );
-
+    }
+    public void evenlyRandom(MouseEvent mouseEvent) {
     }
 
-    public void setSize(){
-
-
-        SIZEwidth = Integer.parseInt(width.getText());
-        SIZEheight  = Integer.parseInt(height.getText());
-
-        points= SIZEheight*SIZEwidth;
-        if(SIZEwidth>1000 || SIZEheight>1000){
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("ERROR");
-            alert.setHeaderText("Powierzchnia jest zbyt duża");
-            alert.setContentText("Maksymalna wartość to: 1000x1000");
-            alert.showAndWait();
-        }
-          else {
-            cell = new Cell[SIZEheight][SIZEwidth];
-            for (int i = 0; i < SIZEheight; i++) {
-                for (int j = 0; j < SIZEwidth; j++) {
-
-                    cell[i][j] = new Cell();
-                }
-            }
-        }
+    public void startButton(ActionEvent actionEvent) {
+        Growth growth = new Growth();
+        growth.growGrains();
+        print();
     }
 
-
-
-    public void getNeeds(){
-
-        String nbh=(String)neighborhood.getValue();
-//        String rd=(String)random.getValue();
-        String bd=(String)boundary.getValue();
-
-        switch(nbh){
-            case "Moore":
-                neighborhoodType=1;
-                break;
-            case "Von Neumann":
-                neighborhoodType=2;
-                break;
-            case "Heksagonal left":
-                neighborhoodType=3;
-                break;
-            case "Heksagonal right":
-                neighborhoodType=4;
-                break;
-            case "Random Heksagonal":
-                neighborhoodType=5;
-                break;case "spr":
-                neighborhoodType=6;
-                break;
-        }
-
-//        switch(rd){
-//            case "Random":
-//                randomType=1;
-//                break;
-//            case "Evenly random":
-//                randomType=2;
-//                break;
-//            case "In ray":
-//                randomType=3;
-//                break;
-//            case "Mouse click":
-//                randomType=4;
-//                break;
-//        }
-
-        switch(bd){
-            case "Periodical":
-                boundaryType=1;
-                randomType=1;
-                break;
-            case "Absorbing":
-                boundaryType=2;
-                break;
-        }
-
-
-    }
-
-    public void rand(){
-
-        getNeeds();
-
-
-
-        if(randomType==1){
-            EMBRYCOUNT = Integer.parseInt(embryCount.getText());
-            randoooom();
-
-        }
-        else if(randomType ==2){
-            EMBRYCOUNT = Integer.parseInt(embryCount.getText());
-            evenlyRandom();
-
-        }
-        else if (randomType==3){
-            EMBRYCOUNT = Integer.parseInt(embryCount.getText());
-           circleRandom();
-
-        }
-        else if (randomType==4){
-            mouseClick();
-        }
-
-        print(canvas.getGraphicsContext2D());
-    }
-
-    public  void randoooom(){
-
-        int x;
-        int y;
-        Random random = new Random();
-        for(int i =0; i<EMBRYCOUNT; i++){
-            x = random.nextInt(SIZEheight);
-            y = random.nextInt(SIZEwidth);
-            if(!cell[x][y].isState()){
-                cell[x][y].setState(true);
-                Color color =Color.color( random.nextDouble(), random.nextDouble(), random.nextDouble());
-                System.out.println(" selected color " + color);
-                cell[x][y].setColor(color);
-                randomedCells.add(cell[x][y]);
-                System.out.println(cell[x][y].getColor().toString());
-            }
-            else {
-                i--;
-            }
-
-
-        }
-    }
-    public  void  circleRandom() {
-        radiusSize = Integer.parseInt(radius.getText());
-
-        boolean add;
-        Random generator=new Random();
-
-        for(int i = 0; i < EMBRYCOUNT; i++) {
-
-            int x = 0,y = 0;
-            try {
-                 x = generator.nextInt(SIZEheight - 2 * radiusSize) + radiusSize;
-                 y = generator.nextInt(SIZEwidth - 2 * radiusSize) + radiusSize;
-            } catch (IllegalArgumentException e) {
-
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("WARNING");
-                alert.setHeaderText("Zbyt duży promień");
-                alert.setContentText("Zbyt duży promień na wylosowanie ziaren");
-                alert.showAndWait();
-            } finally {
-
-
-                if (!cell[x][y].isState()) {
-
-
-                    add = true;
-
-                    for (int j = x - radiusSize; j < x + radiusSize; j++) {
-                        for (int k = y - radiusSize; k < y + radiusSize; k++) {
-                            if (cell[j][k].isState()) {
-                                add = false;
-
-                                break;
-                            }
-                            if (!add)
-                                break;
-                        }
-                    }
-                    if (!add) {
-                        i--;
-
-                    } else {
-                        cell[x][y].setState(true);
-                        cell[x][y].setColor(Color.color(Math.random(), Math.random(), Math.random()));
-                    }
-                }
-            }
-        }
-
-//       radiusSize = Integer.parseInt(radius.getText());
-//        int x;
-//        int y;
-//        Random random = new Random();
-//        int r =0;
-//        boolean ok  = false;
-//       while(r < EMBRYCOUNT) {
-//           x = random.nextInt(SIZE);
-//           y = random.nextInt(SIZE);
-//
-//         if(!ifInCircle(x,y)) {
-//              cell[x][y].setState(true);
-//              cell[x][y].setColor(Color.color( Math.random(), Math.random(), Math.random()));
-//             randomedCells.add(cell[x][y]);
-//              r++;
-//          }
-//           for (int i = 0; i < SIZE; i++) {
-//               for (int j = 0; j < SIZE; j++) {
-//
-//
-//                 if(cell[i][j].isState()){
-//                     int distance = (int) Math.sqrt(Math.pow((i - x), 2) + Math.pow((j - y), 2));
-//                     if (distance > radiusSize) {
-//                         ok = true;
-//                     }
-//                 }
-//                 else
-//                     ok = true;
-//
-//
-//               }
-//
-//           }
-//           if(ok){
-//               cell[x][y].setState(true);
-//               cell[x][y].setColor(Color.color( Math.random(), Math.random(), Math.random()));
-//               randomedCells.add(cell[x][y]);
-//               r++;
-//           }
-//       }
-
-    }
-    public boolean ifInCircle(int x, int y){
-
-        for (int i = 0; i < SIZEheight; i++) {
-            for (int j = 0; j < SIZEwidth; j++) {
-                if (cell[i][j].isState()){
-                    int distance = (int) Math.sqrt(Math.pow((i - x), 2) + Math.pow((j - y), 2));
-                    if(distance  < 2){
-                        if (cell[i][j].isState()){
-                            return  true;
-                        }
-                    }
-                    }
-            }
-
-            }
-            return  false;
-    }
-
-    public  void evenlyRandom(){
-
-////
-//        System.out.println("SIZE " + SIZEheight);
-//        Random random = new Random();
-//        double nx = Math.sqrt( (SIZEwidth/SIZEheight) * EMBRYCOUNT + ((SIZEwidth - SIZEheight ) * (SIZEwidth - SIZEheight)) / (4*SIZEheight * SIZEheight)) - (SIZEwidth - SIZEheight) / (2*SIZEheight);
-//        double ny = SIZEheight/SIZEwidth*nx + 1 -SIZEheight/SIZEwidth;
-//
-//        double dx =SIZEwidth/nx;
-//        double dy =SIZEheight/ny;
-//
-//        while (EMBRYCOUNT > 0)
-//        {
-//            for (int i = 0; (i< SIZEheight && EMBRYCOUNT > 0); i+=dx )
-//            {
-//                for (int j = 0; (j< SIZEwidth && EMBRYCOUNT > 0); j+=dy ){
-//                    cell[i][j].setState(true);
-//                    cell[i][j].setColor(Color.color( Math.random(), Math.random(), Math.random()));
-//                    randomedCells.add(cell[i][j]);
-//                    EMBRYCOUNT--;
-//                }
-//            }
-   //     }
-
-
-
-        int sqrt=(int) Math.sqrt(EMBRYCOUNT);
-        int borderx = SIZEheight/sqrt-1;
-        int bordery = SIZEwidth/sqrt-1;
-        int counter=0;
-
-        for(int i=0;i<=sqrt;i++)
-        {
-            for(int j=0;j<=sqrt && counter < EMBRYCOUNT;j++)
-            {
-                if(!cell[i*borderx+1][j*bordery+1].isState()){
-                cell[i*borderx+1][j*bordery+1].setState(true);
-                cell[i*borderx+1][j*bordery+1].setColor(Color.color( Math.random(), Math.random(), Math.random()));
-
-                counter++;
-            }}
-        }
-
-    }
-
-    @FXML
-    public  void mouseClicked(double x, double y){
-
-
-        double width = canvas.getGraphicsContext2D().getCanvas().getWidth() / SIZEwidth;
-        double height = canvas.getGraphicsContext2D().getCanvas().getHeight() / SIZEheight;
-        x = (int) ((x / width) *width);
-        y = (int) ((y / height) *height);
-
-        int canvasX = (int) (x/height);
-        int canvasY = (int) (y/width);
-
-        if(canvasX > SIZEheight -1 )
-            canvasX = SIZEwidth -1;
-        if (canvasX <0)
-            canvasX = 0;
-
-        if(canvasY > SIZEheight -1 )
-            canvasY = SIZEheight -1;
-        if (canvasY <0)
-            canvasY = 0;
-
-        int Xend = canvasX;
-        int Yend = canvasY;
-
-        System.out.println( "x,  y " + Xend + " " + Yend +  " " + cell[Xend][Yend].isState() + " " +cell[Xend][Yend].getColor());
-        Platform.runLater( () ->{
-            if(!cell[Xend][Yend].isState()){
-                cell[Xend][Yend].setState(true);
-                cell[Xend][Yend].setColor(Color.color( Math.random(), Math.random(), Math.random()));
-                System.out.println( "x2,  y2 " + Xend + " " + Yend + " " + cell[Xend][Yend].isState() + " " +cell[Xend][Yend].getColor());
-
-                randomedCells.add(cell[Xend][Yend]);
-
-
-               // canvas.getGraphicsContext2D().setFill(cell[Xend][Yend].getColor());
-               // canvas.getGraphicsContext2D().fillRect(width * Xend + 1, width * Yend + 1, width - 1, width - 1);
-                print(canvas.getGraphicsContext2D());
-
-                canvas.setOnMouseDragged(null);
-                canvas.setOnMouseClicked(null);
-            }
-
-       });
-    }
-
-
-    public void mouseClick() {
-        canvas.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_PRESSED, new EventHandler<javafx.scene.input.MouseEvent>() {
-            @Override
-            public void handle(javafx.scene.input.MouseEvent event) {
-                double x = event.getX();
-                double y = event.getY();
-                mouseClicked(x, y);
-              //  canvas.setOnMouseClicked(null);
-               canvas.setOnMouseDragged(null);
-
-            }
-
-
-
-        });
-       // canvas.setOnMouseDragged(null);
-    }
-
-//    public static void start(){
-//
-//
-//
-//        List<Point> points =vonNeuman.getNeighborhood();
-//
-//        for(int y = 0; y < size; y++){
-//            for(int x = 0; x < size; x++) {
-//                String c;
-//                TextField tf = new TextField();
-//                c = "-fx-background-color: " + cells[x][y].getColor().toString();
-//                tf.setStyle(c);
-//                GridPane.setRowIndex(tf,y);
-//                GridPane.setColumnIndex(tf,x);
-//                root.getChildren().add(tf);
-//            }
-//
-//        }
-//
-//    }
-
-    @FXML
-    public void startButton() throws InterruptedException {
-
-        stopClick = false;
-
-        runner =  new Runner(this);
-        runner.setStop(false);
-        Thread thread =  new Thread(runner);
-        thread.setDaemon(true);
-        thread.start();
-
-
-//
-//        if(neighborhoodType ==1)
-//            nb = new Moore();
-//        if(neighborhoodType ==2)
-//            nb = new vonNeuman();
-//        if(neighborhoodType ==3)
-//            nb = new HexagonalLeft();
-//        if(neighborhoodType ==4)
-//            nb = new HexagonalRight();
-//            Thread t = new Thread(this);
-//            t.start();
-
-
-
-//        for(int i = 0 ; i<100; i++) {
-//            Task<Void> task = new Task<Void>() {
-//                // Implement required call() method
-//                @Override
-//                protected Void call() throws Exception {
-//                    // Add delay code from initial attempt
-//                    try {
-//                        //Thread.sleep(100);
-//                    } catch (Exception e) {
-//                    }
-//
-//                    Platform.runLater(() ->{
-//                                nextGeneration();
-//                        print(canvas.getGraphicsContext2D());
-//                            }
-//
-//
-//                    );
-//
-//
-//
-//                    // We're not interested in the return value, so return null
-//                    return null;
-//                }
-//            };
-//// Run task in new thread
-//            new Thread(task).start();
-//
-//        }
-
-
-
-//        Thread thread = new Thread(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                Runnable updater = new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        nextGeneration();
-//                        print(canvas.getGraphicsContext2D());
-//                    }
-//                };
-//
-//                while (true) {
-//                    try {
-//                        Thread.sleep(700);
-//                    } catch (InterruptedException ex) {
-//                    }
-//
-//                    // UI update is run on the Application thread
-//                    Platform.runLater(updater);
-//                }
-//            }
-//
-//        });
-        // don't let thread prevent JVM shutdown
-//        thread.setDaemon(true);
-//        thread.start();
-//
-        // oryginalne
-//        KeyFrame kf = new KeyFrame(Duration.seconds(0.5), e -> {
-//            nextGeneration();
-//            print(canvas.getGraphicsContext2D());
-//
-//        });
-//        tl = new Timeline(kf);
-//        tl.setCycleCount(500);
-//
-//            tl.play();
-
-
-        // koniec
-
-//for(int i = 0 ; i<100; i++){
-//
-//    Platform.runLater(new Runnable() {
-//        public void run() {
-//
-//            nextGeneration();
-//            print(canvas.getGraphicsContext2D());
-//        }
-//    });
-//
-//
-//}
-
-
-// tooo dziala w miare ok
-//
-//        points = 1;
-//        stopClick = false;
-//        Task task = new Task<Void>() {
-//            @Override public Void call() {
-//
-//                 final int max = 300;
-//                while ((!stopClick) ) {
-//                  //  if(countWhite==false){
-//                        nextGeneration();
-//
-//                        print(canvas.getGraphicsContext2D());
-//                    points = SIZEheight*SIZEwidth;
-//                  //  }
-//
-//                }
-//
-//
-//                return null;
-//            }
-//        };
-//
-//       Thread t= new Thread(task);
-//               t.start();
-//
-
-
-
-//
-//        var t = Thread(Runnable {
-//            print(canvas.getGraphicsContext2D());
-//        }).start()
-//        Thread(Runnable {
-//            run {
-//                val timeSpent = measureNanoTime {
-//                    sort(data)
-//                }
-//                time.text = "Time spent: ${timeSpent/1_000_000.0}ms"
-//                doRun = false
-//            }
-//        }).start()
-//
-//        if  (stopClick || countWhite )
-//            t.stop();
-//
-//
-//        Task<Long> task = new Task<Long>() {
-//            @Override protected Long call() throws Exception {
-//                long a=0;
-//                long b=1;
-//                for (long i = 0; i < Long.MAX_VALUE; i++){
-//                    final long v = a;
-//                    Platform.runLater(new Runnable() {
-//                                          @Override public void run() {
-//                                           //   updateValue(v);
-//                                          }
-//                                      }
-//                            a += b;
-//                    b = a - b;
-//                }
-//                return a;
-//            }
-//        };
-//
-//
-//        stopClick = false;
-//        Thread t;
-//        t = new Thread(() -> {
-//
-//            while (!stopClick) {
-//
-//
-//
-//
-//                    nextGeneration();
-//                //visTask();
-//                //  print(canvas.getGraphicsContext2D());
-//
-//
-//                try {
-//                    Thread.sleep(20);
-//
-//                } catch (InterruptedException e1) {
-//                    e1.printStackTrace();
-//
-//                }
-//
-//
-//            }
-//
-//        });
-//
-//        t.start();
-//
-//        if(stopClick)
-//            t.stop();
-
-
-    }
-
-//    public void run() {
-//        while (!stopClick) {
-//            nextGeneration();
-//            print(canvas.getGraphicsContext2D());
-//            try {
-//                Thread.sleep(100);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-
-    void print(GraphicsContext gc) {
-        double width = canvas.getGraphicsContext2D().getCanvas().getWidth() / SIZEwidth;
-        double height = canvas.getGraphicsContext2D().getCanvas().getHeight() / SIZEheight;
-
-        for (int i = 0; i < SIZEheight; i++) {
-            for (int j=0; j<SIZEwidth; j++){
-                if (cell[i][j].isState()){
-
-
-                    gc.setFill(cell[i][j].getColor());
-             //    gc.fillRect(height * i + 1, width * j + 1, height - 1, width - 1);
-                  // gc.fillRect(height * i , width * j , height , width );
-
-                   // System.out.println("width " + width);
-              //  gc.fillRect(i, j, 1, 1);
-               gc.fillRect(i*height, j*width, height, width);
-                   // gc.setFill(cell[i][j].getColor());
-                    //System.out.println(cell[i][j].getColor());
-                }
-
-            }
-        }
-    }
-    Map.Entry<Color, Integer> maxEntry;
-
-
-
-    public void nextGeneration() {
-        Cell[][] cells = new Cell[SIZEheight][SIZEwidth];
-        for (int i = 0; i < SIZEheight; i++) {
-            for (int j = 0; j < SIZEwidth; j++) {
-                cells[i][j] =  new Cell();
-                cells[i][j].setState(cell[i][j].isState());
-                cells[i][j].setColor(cell[i][j].getColor());
-
-            }
-        }
-
-        for (int i = 0; i < SIZEheight; i++) {
-            for (int j = 0; j < SIZEwidth; j++) {
-
-//                boolean check = false;
-//                for (Cell c :randomedCells ) {
-//                    if(cells[i][j].equals(c) && cells[i][j].ifNb  ) {
-//                        check = true; break;
-//                    }
-//                }
-                if (!cells[i][j].isState() ) {
-
-                    if (boundaryType == 1) {
-                        list = Nb.getNeighborhood(i, j, SIZEwidth,SIZEheight, 1, neighborhoodType);
-                    } else if (boundaryType == 2) {
-                        list = Nb.getNeighborhood(i, j, SIZEwidth,SIZEheight, 2, neighborhoodType);
-                    }
-
-
-//                    if(neighborhoodType ==5){
-//
-//                      //  randHeksaType();
-//                        int x =rand.nextInt(2);
-//                        if(x==1)
-//                            nb = new HexagonalRight();
-//                        else
-//                            nb = new HexagonalLeft();
-//                    }
-
-//                   if(neighborhoodType ==6){
-//
-//                       int x =rand.nextInt(5);
-//                       if(x==0)
-//                         nb = new PentagonaLRight();
-//                       else if(x==1)
-//                           nb = new PentagonalLeft();
-//                        if(x==2)
-//                            nb = new PentagonalUp();
-//                        if(x==3)
-//                            nb = new PentagonalDown();
-//                  }
-
-
-
-
-//                         for (Point p: list ) {
-//                         if(!cells[p.getX()][p.getY()].isState()){
-//                             cell[p.getX()][p.getY()].setState(true);
-//                             System.out.println(cells[i][j].getColor().toString());
-//                             cell[p.getX()][p.getY()].setColor(cells[i][j].getColor());
-//                             System.out.println(cells[p.getX()][p.getY()].getColor().toString());
-//                         }
-//
-//                         }
-
-                     m = new HashMap();
-                    Color c;
-                    int count = 1;
-                    if (!cells[i][j].isState()) {
-                        for (Point p : list) {
-                            if (cells[p.getX()][p.getY()].isState() && !cells[p.getX()][p.getY()].getColor().equals(Color.WHITE)) {
-                                if (m.containsKey(cells[p.getX()][p.getY()].getColor())){
-                                    m.put(cells[p.getX()][p.getY()].getColor(), count + 1);
-                                    cells[p.getX()][p.getY()].setIfNb(true);
-                                }
-
-                                else {
-                                    m.put(cells[p.getX()][p.getY()].getColor(), count);
-                                    cells[p.getX()][p.getY()].setIfNb(true);
-                                }
-                            }
-
-                        }
-                    }
-
-                    if (m.size() > 0) {
-
-                       maxEntry =null;
-
-                        for (Map.Entry<Color, Integer> entry : m.entrySet()) {
-                            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
-                                maxEntry = entry;
-                            }
-                        }
-                        c = maxEntry.getKey();
-                        cell[i][j].setColor(c);
-                        cell[i][j].setState(true);
-
-                    }
-                }
-
-
-            }
-        }
-
-//        for (int i = 0; i < SIZE; i++) {
-//
-//            for (int j = 0; j < SIZE; j++) {
-//               cell[i][j].setState(cell[i][j].isState());
-//               cell[i][j].setColor(cell[i][j].getColor());
-//               if(!cell[i][j].isState())
-//                   countWhite ++;
-//
-//            }
-//        }
-
-       // if(!stopClick)
-      //  print(canvas.getGraphicsContext2D());
-
-    }
-
-    private void randHeksaType() {
-
-
-    }
-
-
-    public  void  clear(){
-
-        for (int i = 0; i < SIZEheight; i++) {
-
-            for (int j = 0; j < SIZEwidth; j++) {
-                cell[i][j].setState(false);
-                cell[i][j].setColor(Color.WHITE);
-
-            }
-        }
-        printClear();
-    }
-
-    public void printClear(){
-//        double width = canvas.getGraphicsContext2D().getCanvas().getWidth() / SIZEwidth;
-//        double height = canvas.getGraphicsContext2D().getCanvas().getHeight() / SIZEheight;
-//
-//        for (int i = 0; i < SIZEheight; i++) {
-//            for (int j=0; j<SIZEwidth; j++){
-//
-//
-//                canvas.getGraphicsContext2D().setFill(Color.WHITE);
-//                    canvas.getGraphicsContext2D().fillRect(height * i , width * j , height , width );
-//                    // gc.fillRect(i, j, 1, 1);
-//
-//
-//            }
-//        }
-        canvas.getGraphicsContext2D().clearRect(0,0,750, 750);
-
-    }
-
-    public void evenlyRandomm(javafx.scene.input.MouseEvent mouseEvent) {
-    }
-
-    public void stop(ActionEvent actionEvent) {
-
-        runner.setStop(true);
-        stopClick =true;
-
+    public void setSize(ActionEvent actionEvent) {
     }
 
     public void finalRand(ActionEvent actionEvent) {
 
-       getNeeds();
-        EMBRYCOUNT = Integer.parseInt(embryCount.getText());
-        randoooom();
-        print(canvas.getGraphicsContext2D());
+        gc.clearRect(0,0,gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+        randomCells.clear();
+        numberOfNucleon = Integer.parseInt(embryCount.getText());
+
+        prepareGrid();
+        validateGrid();
+
+        cleanNucleation();
+        Nucleons.setNumberOfGrains(numberOfNucleon);
+        colorGrains();
+        randNucleons();
+        setState();
+        print();
+
     }
 
 
-//
-//    @Override
-//    public void run() {
-//        stopClick=false;
-//        while (!stopClick){
-//
-//        }
-//        nextGeneration();
-//        print(canvas.getGraphicsContext2D());
+    public void stop(ActionEvent actionEvent) {
+    }
+
+    public void clear(ActionEvent actionEvent) {
+
+        cleanGrowth();
+        cleanNucleation();
+        gc.clearRect(0,0,gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+        print();
+
+
+    }
+
+    private void randNucleons() {
+
+        Random generator = new Random();
+
+        for (Cell c : Nucleons.getGrid().getGrid())
+        {
+            c.setState(0);
+        }
+
+        for (int i = 0; i < Nucleons.getNumberOfGrains(); i++)
+        {
+                int random = generator.nextInt(Nucleons.getGrid().getGrid().size());
+                if(this.randomCells.contains(random)){
+                    i--;
+                }
+                else{
+                    this.randomCells.add(random);
+                }
+
+        }
+    }
+
+    private void setState() {
+        Iterator<Integer> iterator = randomCells.iterator();
+        int id = 1;
+        while (iterator.hasNext()) {
+            int i = iterator.next();
+            Nucleons.getGrid().getCellByPosition(i).setState(id);
+            id++;
+        }
+    }
+
+
+    private void colorGrains() {
+        HashMap<Integer, Color> grains = new HashMap<>();
+
+        for (int i = 1; i <= Nucleons.getNumberOfGrains(); i++) {
+
+            Color color = Color.color(Math.random(), Math.random(), Math.random());
+
+            if (color.equals(Color.WHITE) || grains.containsValue(color)) {  --i;  continue;  }
+
+            grains.put(i, color);
+            Nucleons.setGrainsColors(grains);
+
+        }
+    }
+
+
+    private static void cleanNucleation() {
+        Nucleons.getGrainsColors().keySet().removeIf(key -> !(key.equals(0)));
+        Nucleons.setNumberOfGrains(0);
+        Nucleons.setNeighbourhood(null);
+        Nucleons.getGrid().getGrid().forEach(cell -> {
+            cell.setState(0);
+            cell.setNextState(0);
+            cell.setNeighbourhood(null);
+
+        });
+    }
+
+    private void print() {
+        if (Nucleons.getGrid() != null) {
+            if(Nucleons.getGrid().getGrid()!=null)
+            for (Cell c : Nucleons.getGrid().getGrid())
+            {
+                if(c.getState() == 0) {
+                    gc.setFill(Color.WHITE);
+                }
+                else {
+                    gc.setFill(Nucleons.getGrainsColors().get(c.getState()));
+                }
+                gc.fillRect(c.getX() * 2, 10 + c.getY()*2, 2, 2);
+
+
+            }
+        }
+    }
+
+
+    private void prepareGrid(){
+        int widthSize = Integer.parseInt(width.getText());
+        int heightSize = Integer.parseInt(height.getText());
+        if (widthSize < 300 || heightSize < 300) {
+            throw new IllegalArgumentException("Grid should be grater than 300x300");
+        }
+        boolean isPeriodic = checkIfPeriodic();
+        Nucleons.cleanGrid();
+        Nucleons.setGrid(new Grid(widthSize, heightSize, isPeriodic));
+
+    }
+
+    private boolean checkIfPeriodic() {
+        boolean isPeriodic =  false;
+
+        if(boundary.getValue() == "Periodical"){
+            isPeriodic =true;
+        }
+        return isPeriodic;
+    }
+
+    private static void cleanGrowth() {
+
+        Nucleons.setNeighbourhood(null);
+        for (Cell c : Nucleons.getGrid().getGrid()) {
+            c.setState(0);
+            c.setNeighbourhood(null);
+
+        }
+    }
+    private File createFile(){
+
+        Stage stage = new Stage();
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("TXT", "*.txt"),
+                new FileChooser.ExtensionFilter("BMP", "*.bmp")
+        );
+
+        File file = chooser.showOpenDialog(stage);
+        return file;
+    }
+
+    public void importTxtButton(ActionEvent actionEvent) {
+        File file = createFile();
+        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+            Nucleons.cleanGrid();
+
+            String currentLine = br.readLine();
+            String[] line = currentLine.split(";");
+
+            Nucleons.setNumberOfGrains(Integer.parseInt(line[3]));
+            Nucleons.setNeighbourhood(line[4]);
+
+            Grid grid = new Grid(Integer.parseInt(line[0]),Integer.parseInt(line[1]),Boolean.parseBoolean(line[2]));
+
+            br.readLine();
+
+            while ((currentLine = br.readLine()) != null) {
+                line = currentLine.split(";");
+                Cell cell = new Cell(Integer.parseInt(line[0]),Integer.parseInt(line[1]));
+                cell.setState(Integer.parseInt(line[2]));
+                grid.setCell(Integer.parseInt(line[0]), Integer.parseInt(line[1]), cell);
+            }
+
+            Nucleons.setGrid(grid);
+            colorGrains();
+            print();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void importBmpButton(ActionEvent actionEvent) {
+        File file = createFile();
+
+        try {
+            BufferedImage image = ImageIO.read(file);
+            Grid grid = new Grid(image.getWidth(), image.getHeight(), false);
+
+            Nucleons.cleanGrid();
+
+            HashMap<Color, Integer> grainsColors = new HashMap<>();
+            grainsColors.put(Color.WHITE, 0);
+
+            int numberOfGrains = 0;
+
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    Color color = intToRgb((image.getRGB(x, y)));
+                    Cell cell = new Cell(x, y);
+                    if (color.equals(Color.WHITE) || color.equals(Color.BLACK))
+                    {
+                        cell.setState(0);
+                    }
+                    else if (grainsColors.containsKey(color))
+                    {
+                        cell.setState(grainsColors.get(color));
+                    }
+                    else
+                        {
+                        numberOfGrains++;
+                        grainsColors.put(color, numberOfGrains);
+                        cell.setState(numberOfGrains);
+                    }
+                    grid.setCell(cell.getX(), cell.getY(), cell);
+                }
+            }
+
+            Nucleons.setGrid(grid);
+            Nucleons.setNumberOfGrains(numberOfGrains);
+
+            Map<Integer, Color> colorsInversed = grainsColors.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+            Nucleons.setGrainsColors(colorsInversed);
+            print();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void exportTxtButton(ActionEvent actionEvent) {
+        File file = createFile();
+        Grid grid = Nucleons.getGrid();
+
+        StringBuilder gridText = new StringBuilder();
+
+        String neighbourhoodType = Nucleons.getNeighbourhoodType();
+
+        gridText.append(grid.getWidth()).append(";").append(grid.getHeight()).append(";").append(grid.isPeriodic()).append(";")
+                .append(Nucleons.getNumberOfGrains()).append(";")
+                .append(neighbourhoodType).append(System.lineSeparator()).append("X").append(";").append("Y").append(";")
+                .append("ID").append(";").append(System.lineSeparator());
+
+        grid.getGrid().forEach(cell ->
+                gridText.append(cell.getX()).append(";").append(cell.getY()).append(";")
+                        .append(cell.getState()).append(";").append(System.lineSeparator())
+        );
+
+        try(PrintWriter printWriter = new PrintWriter(file)) {
+            printWriter.write(gridText.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void exportBmpButton(ActionEvent actionEvent) {
+        File file = createFile();
+        Grid grid = Nucleons.getGrid();
+
+        int width = grid.getWidth();
+        int height = grid.getHeight();
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        grid.getGrid().forEach(c -> {
+            int x = c.getX();
+            int y = c.getY();
+
+            float blue = (float) Nucleons.getColorForGrain(c.getState()).getBlue();
+            float green = (float) Nucleons.getColorForGrain(c.getState()).getGreen();
+            float red = (float) Nucleons.getColorForGrain(c.getState()).getRed();
+            int color = convertColor(red, green, blue);
+
+            image.setRGB(x, y, color);
+
+        });
+
+        try{
+            ImageIO.write(image, "bmp", file);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+
+    private void validateGrid() {
+        if (numberOfNucleon < 2)
+            throw new IllegalArgumentException("Set number of grains grater than 2");
+        if (numberOfNucleon > Nucleons.getGrid().getGrid().size())
+            throw new IllegalArgumentException("Set number of grains less than size");
+    }
+
+    //    public  int RGBtoINT(Color c) {
+//        int rgb = c.getRed();
+//        rgb = (rgb << 8) + c.getGreen();
+//        rgb = (rgb << 8) + c.getBlue();
+//        return rgb;
 //    }
-//    public void rePrint(){
 //
-//        for (int i = 0; i < SIZE; i++) {
-//
-//            for (int j = 0; j < SIZE; j++) {
-//
-//                if(cell[i][j].isState()){
-////                    cell[i][j].setColor(cell[i][j].getColor());
-//                  cell[i][j].setColor(Color.color(0.4,0.1, 1));
-//                }
-//
-//            }
-//            }
-//    }
+    private Color intToRgb(int rgb) {
+        int b =  rgb & 255;
+        int g = (rgb >> 8) & 255;
+        int r =   (rgb >> 16) & 255;
+
+        Color color = (Color.rgb(b,g,r));
+        return color;
+    }
+
+    private int convertColor(float red, float green, float blue){
+        int  r = Math.round(255 * red);
+        int  b = Math.round(255 * blue);
+        int  g = Math.round(255 * green);
+
+         r = (r << 16) & 0x00ff0000;
+        g = (g<<8) & 0x0000ff00;
+        b = b & 0x000000ff;
+        return 0xff000000 | r | g | b;
+
+    }
 
 }
