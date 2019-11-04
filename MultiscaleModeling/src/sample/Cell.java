@@ -6,6 +6,7 @@ public class Cell {
     private int state;
     private int nextState;
     private Neighbourhood neighbourhood;
+    private int id;
 
     public Cell(int x, int y) {
         this.x = x;
@@ -42,5 +43,13 @@ public class Cell {
 
     public void setNextState(int nextState) {
         this.nextState = nextState;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -12,9 +12,10 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1300.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
     <children>
-        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+        <AnchorPane fx:id="paneId" prefHeight="200.0" prefWidth="200.0">
             <children>
                 <Canvas fx:id="canvas" height="1000.0" layoutX="87.0" layoutY="70.0" onMouseClicked="#evenlyRandom" width="1000.0">
+
                 </Canvas>
                 <!--<ComboBox fx:id="random" layoutX="358.0" layoutY="14.0" onAction="#rand" prefHeight="31" prefWidth="172.0" promptText="Random" />-->
                 <ComboBox fx:id="boundary" layoutX="220.0" layoutY="15.0" prefHeight="31" prefWidth="172.0" promptText="Boundary" />
@@ -57,6 +58,13 @@
                   </MenuItem>
               </items>
             </MenuButton>
+            <ComboBox fx:id="inclusionTypeId" layoutX="1066.0" layoutY="360.0" prefHeight="31.0" prefWidth="186.0" promptText="Inclusion type" />
+            <TextField fx:id="inclusionId" layoutX="1061.0" layoutY="253.0" text="15" />
+            <TextField fx:id="inclusionSizeId" layoutX="1061.0" layoutY="303.0" text="2" />
+            <Label layoutX="1056.0" layoutY="226.0" text="Number of inclusion" />
+            <Label layoutX="1066.0" layoutY="284.0" text="Size of inclusions" />
+            <Label layoutX="1066.0" layoutY="339.0" text="Type of inclusion" />
+            <Button fx:id="inclusionsAddButtonId" layoutX="1061.0" layoutY="409.0" mnemonicParsing="false" onAction="#addInclusions" text="Add inclusions" />
             </children></AnchorPane>
         <ComboBox fx:id="neighborhood" layoutX="14.0" layoutY="14.0" prefHeight="31" prefWidth="172.0" promptText="Neighborhood" />
         <TextField fx:id="height" layoutX="1063.0" layoutY="46.0" text="300" />

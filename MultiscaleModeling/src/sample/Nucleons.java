@@ -13,11 +13,9 @@ public class Nucleons {
     private static Grid grid;
     private static int numberOfGrains;
     private static String neighbourhoodType;
+    private static int numberOfInclusions;
     private static Map<Integer, Color> grainsColors = new HashMap<>();
 
-    static {
-        grainsColors.put(0, Color.WHITE);
-    }
 
     private Nucleons() {}
 
@@ -61,7 +59,23 @@ public class Nucleons {
         grid = null;
         numberOfGrains = 0;
         neighbourhoodType = null;
-        grainsColors.keySet().removeIf(key -> !(key.equals(0)));
+        grainsColors.keySet().removeIf(key -> !(key.equals(0)) && !(key.equals(1)));
+        numberOfInclusions = 0;
+    }
+    public static int getNumberOfInclusions() {
+        return numberOfInclusions;
+    }
+
+    public static void setNumberOfInclusions(int numberOfInclusions) {
+        Nucleons.numberOfInclusions = numberOfInclusions;
+    }
+
+    public static boolean checkIfAnyEmptySpaces() {
+        for (Cell c: Nucleons.getGrid().getGrid()) {
+            if (c.getState() == 0)
+                return true;
+        }
+        return false;
     }
 }
 

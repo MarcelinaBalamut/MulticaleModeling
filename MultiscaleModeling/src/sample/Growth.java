@@ -45,7 +45,7 @@ public   class Growth {
 
         for (Cell n : neighbours)
         {
-            if (n.getState() != 0)
+            if (n.getState() != 0 && n.getState() != 1)
                 nbStates.merge(n.getState(), 1, Integer::sum);
         }
 
@@ -57,6 +57,7 @@ public   class Growth {
                     maxEntry = entry;
             }
             c.setNextState(maxEntry.getKey());
+            //c.setId(0);
         }
     }
 }
