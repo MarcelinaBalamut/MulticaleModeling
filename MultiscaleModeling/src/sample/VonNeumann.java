@@ -13,9 +13,9 @@ public class VonNeumann extends  Neighbourhood{
         int x = cell.getX();
         int y = cell.getY();
 
-        super.addCellToList( grid.getCell(x, y - 1) );
-        super.addCellToList( grid.getCell(x - 1, y) );
-        super.addCellToList( grid.getCell(x + 1, y) );
-        super.addCellToList( grid.getCell(x, y + 1) );
+        super.addCell( grid.getCell(x, y - 1) );
+        super.addCell( grid.getCell(x - 1, y) );
+        super.addCell( grid.getCell(x + 1, y) );
+        super.addCell( grid.getCell(x, y + 1) );
     }
 }

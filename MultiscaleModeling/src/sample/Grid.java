@@ -44,6 +44,11 @@ public class Grid {
         return this.grid.get(y * this.width + x);
     }
 
+
+
+
+
+
     public void setCell(int x, int y, Cell cell){
         grid.set(y * width + x, cell);
     }

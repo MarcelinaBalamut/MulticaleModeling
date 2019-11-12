@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
@@ -14,7 +15,7 @@
     <children>
         <AnchorPane fx:id="paneId" prefHeight="200.0" prefWidth="200.0">
             <children>
-                <Canvas fx:id="canvas" height="1000.0" layoutX="87.0" layoutY="70.0" onMouseClicked="#evenlyRandom" width="1000.0">
+                <Canvas fx:id="canvas" height="1000.0" layoutX="87.0" layoutY="70.0" onMouseClicked="#mouseClick" width="1000.0">
 
                 </Canvas>
                 <!--<ComboBox fx:id="random" layoutX="358.0" layoutY="14.0" onAction="#rand" prefHeight="31" prefWidth="172.0" promptText="Random" />-->
@@ -65,6 +66,12 @@
             <Label layoutX="1066.0" layoutY="284.0" text="Size of inclusions" />
             <Label layoutX="1066.0" layoutY="339.0" text="Type of inclusion" />
             <Button fx:id="inclusionsAddButtonId" layoutX="1061.0" layoutY="409.0" mnemonicParsing="false" onAction="#addInclusions" text="Add inclusions" />
+            <TextField fx:id="shapePercentage" layoutX="1061.0" layoutY="475.0" text="50"/>
+            <Label layoutX="1066.0" layoutY="440.0" text="Shape percentage" />
+            <RadioButton fx:id="shapeControlId" layoutX="1083.0" layoutY="535.0" mnemonicParsing="false" text="Shape control" />
+            <Label layoutX="1057.0" layoutY="570.0" text="Structure" />
+            <ComboBox fx:id="structureTypeId" layoutX="1049.0" layoutY="602.0" prefWidth="150.0" promptText="Structure type" />
+            <Button fx:id="chooseId" layoutX="1108.0" layoutY="666.0" mnemonicParsing="false" onAction="#choose" text="Choose" />
             </children></AnchorPane>
         <ComboBox fx:id="neighborhood" layoutX="14.0" layoutY="14.0" prefHeight="31" prefWidth="172.0" promptText="Neighborhood" />
         <TextField fx:id="height" layoutX="1063.0" layoutY="46.0" text="300" />

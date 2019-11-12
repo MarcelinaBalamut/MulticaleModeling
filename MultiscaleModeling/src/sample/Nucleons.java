@@ -15,6 +15,7 @@ public class Nucleons {
     private static String neighbourhoodType;
     private static int numberOfInclusions;
     private static Map<Integer, Color> grainsColors = new HashMap<>();
+    private static int numberOfStructures;
 
 
     private Nucleons() {}
@@ -61,6 +62,7 @@ public class Nucleons {
         neighbourhoodType = null;
         grainsColors.keySet().removeIf(key -> !(key.equals(0)) && !(key.equals(1)));
         numberOfInclusions = 0;
+        numberOfStructures = 0;
     }
     public static int getNumberOfInclusions() {
         return numberOfInclusions;
@@ -76,6 +78,14 @@ public class Nucleons {
                 return true;
         }
         return false;
+    }
+
+    public static int getNumberOfStructures() {
+        return numberOfStructures;
+    }
+
+    public static void setNumberOfStructures(int numberOfStructures) {
+        Nucleons.numberOfStructures = numberOfStructures;
     }
 }
 
