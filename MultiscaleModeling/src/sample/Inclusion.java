@@ -39,12 +39,12 @@ public class Inclusion {
 
     public void addInclusionOnBoundaries(int inclusionNumber, int size, String inclusionType) {
 
-        Nucleons.setNumberOfInclusions(numberOfInclusions);
+        Nucleons.setNumberOfInclusions(inclusionNumber);
 
         Set<Integer> set = new HashSet<>();
         Random generator = new Random();
 
-        for (int i = 0; i < numberOfInclusions; i++) {
+        for (int i = 0; i < inclusionNumber; i++) {
             boolean search = true;
             int random;
 

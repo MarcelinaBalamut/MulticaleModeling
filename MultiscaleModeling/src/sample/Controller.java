@@ -39,10 +39,11 @@ public class Controller implements Initializable {
     public RadioButton shapeControlId;
     public ComboBox structureTypeId;
     public Button chooseId;
+    public ComboBox borderSizeId;
 
     private int numberOfNucleon;
     private Set<Integer> randomCells = new HashSet<>();
-
+    private List<Cell> borderCells;
     int padding = 0;
     boolean clearGrid = true;
     private GrainsSelector grainsSelector;
@@ -70,7 +71,8 @@ public class Controller implements Initializable {
         structureTypeId.getItems().addAll(
                 "Substructure",
                  "Dual-Phase",
-                "Disable"
+                "Disable",
+                "None"
         );
         borderSizeId.getItems().addAll(
                 "0",
@@ -206,8 +208,8 @@ public class Controller implements Initializable {
         int colorSize = colors.size();
         for (int i = colorSize; i < colorSize + numberOfNucleon; i++){
 
-
-            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) || colors.containsValue(color)) {
+            Color color = Color.color(Math.random(), Math.random(), Math.random());
+            if (colors.equals(Color.WHITE) || colors.equals(Color.BLACK) || colors.equals(Color.MAGENTA) || colors.containsValue(colors)) {
                 --i;
                 continue;
             }
@@ -454,9 +456,9 @@ public class Controller implements Initializable {
     }
 
     public void addInclusions(ActionEvent actionEvent) {
-        int amountOfInclusion = Integer.parseInt(inclusionId.getText());
+        int inclusionNumber = Integer.parseInt(inclusionId.getText());
         String inclusionType = inclusionTypeId.getValue().toString();
-        Nucleons.setNumberOfInclusions(amountOfInclusion);
+        Nucleons.setNumberOfInclusions(inclusionNumber);
         if (Nucleons.getGrid() == null) {
             prepareGrid();
             addInclusions(actionEvent);
@@ -467,14 +469,10 @@ public class Controller implements Initializable {
             Inclusion inclusion = new Inclusion();
 
             if (Nucleons.getNumberOfGrains() == 0)
-                inclusion.addInclusion(amountOfInclusion, inclusionSize, inclusionType);
+                inclusion.addInclusion(inclusionNumber, inclusionSize, inclusionType);
             else
-        } else {
                 inclusion.addInclusionOnBoundaries(inclusionNumber, inclusionSize, inclusionType);
-        } else {
-
         }
-
         print();
     }
 
@@ -517,14 +515,14 @@ public class Controller implements Initializable {
         for (Cell cell : Nucleons.getGrid().getGrid()) {
             if (cell.getState() != 0 && cell.getState() != 1) {
                 if (!colors.containsKey(cell.getState())) {
-                    grainColors.put(n, Nucleons.getColorForGrain(cell.getState()));
-                    colors.put(cell.getState(), n);
-                    n++;
+                    grainColors.put(id, Nucleons.getColorForGrain(cell.getState()));
+                    colors.put(cell.getState(), id);
+                    id++;
                 }
                 cell.setState(colors.get(cell.getState()));
             }
         }
-        Nucleons.setNumberOfSubstructures(n - 2);
+        Nucleons.setNumberOfStructures(id - 2);
         Nucleons.setGrainsColors(grainColors);
     }
 
@@ -544,7 +542,7 @@ public class Controller implements Initializable {
                 cell.setState(id);
             }
         }
-        Nucleons.setNumberOfSubstructures(1);
+        Nucleons.setNumberOfStructures(1);
         Nucleons.setGrainsColors(grainColors);
     }
 

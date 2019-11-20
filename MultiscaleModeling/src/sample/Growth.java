@@ -57,7 +57,7 @@ public   class Growth {
         for (Cell n : neighbours)
         {
             if (n.getState() > 1 + Nucleons.getNumberOfStructures())
-                nbStates.merge(n.getState(), 1, Integer::sum);
+                states.merge(n.getState(), 1, Integer::sum);
         }
 
         if(!states.isEmpty())
