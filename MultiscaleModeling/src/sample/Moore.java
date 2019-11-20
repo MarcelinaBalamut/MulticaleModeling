@@ -14,13 +14,13 @@ public class Moore extends Neighbourhood{
         int cx = cell.getX();
         int cy = cell.getY();
 
-        super.addCell( grid.getCell(cx - 1, cy - 1) );
-        super.addCell( grid.getCell(cx, cy - 1) );
-        super.addCell( grid.getCell(cx + 1, cy - 1) );
-        super.addCell( grid.getCell(cx - 1, cy) );
-        super.addCell( grid.getCell(cx + 1, cy) );
-        super.addCell( grid.getCell(cx - 1, cy + 1) );
-        super.addCell( grid.getCell(cx, cy + 1) );
-        super.addCell( grid.getCell(cx + 1, cy + 1) );
+        super.addCellList( grid.getCell(cx - 1, cy - 1) );
+        super.addCellList( grid.getCell(cx, cy - 1) );
+        super.addCellList( grid.getCell(cx + 1, cy - 1) );
+        super.addCellList( grid.getCell(cx - 1, cy) );
+        super.addCellList( grid.getCell(cx + 1, cy) );
+        super.addCellList( grid.getCell(cx - 1, cy + 1) );
+        super.addCellList( grid.getCell(cx, cy + 1) );
+        super.addCellList( grid.getCell(cx + 1, cy + 1) );
     }
 }

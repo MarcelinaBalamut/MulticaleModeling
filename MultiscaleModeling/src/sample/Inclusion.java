@@ -11,17 +11,17 @@ public class Inclusion {
     public void addInclusion(int inclusionNumber, int size, String inclusionType) {
 
         Nucleons.setNumberOfInclusions(inclusionNumber);
-        Set<Integer> set = new HashSet<>();
+        Set<Integer> randomCells = new HashSet<>();
 
         Random generator = new Random();
 
         for (int i = 0; i < inclusionNumber; i++) {
             if (Nucleons.checkIfAnyEmptySpaces()) {
                 int random = generator.nextInt(Nucleons.getGrid().getGrid().size());
-                if (set.contains(random)) {
+                if (randomCells.contains(random)) {
                     i--;
                 } else
-                    set.add(random);
+                    randomCells.add(random);
 
                 if (inclusionType == "Circle") {
                     addCircle(random, size);
@@ -37,7 +37,7 @@ public class Inclusion {
 
     }
 
-    public void addInclusionOnBoundaries(int numberOfInclusions, int size, String inclusionType) {
+    public void addInclusionOnBoundaries(int inclusionNumber, int size, String inclusionType) {
 
         Nucleons.setNumberOfInclusions(numberOfInclusions);
 
@@ -98,7 +98,8 @@ public class Inclusion {
         int y = grainRoot.getY();
         int fromMiddle = size/2;
 
-        if (size % 2 == 0) {
+        if (size % 2 == 0)
+        {
             fromMiddle--;
         }
 
@@ -162,7 +163,6 @@ public class Inclusion {
 
                 }
                 catch (NullPointerException e) {
-
                     continue;
 
                 }

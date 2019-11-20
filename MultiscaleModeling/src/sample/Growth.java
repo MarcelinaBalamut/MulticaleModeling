@@ -11,6 +11,7 @@ public   class Growth {
     private VonNeumann nearestMoore;
     private FurtherMoore furtherMoore;
     private int probability;
+    private Random generator;
 
     void growGrains(String nb, boolean shapeControl) {
 
@@ -41,7 +42,6 @@ public   class Growth {
                     temp.add(c);
                 }
             }
-
             for (Cell c : temp)
             {
                 c.setState(c.getNextState());
@@ -57,7 +57,7 @@ public   class Growth {
         for (Cell n : neighbours)
         {
             if (n.getState() > 1 + Nucleons.getNumberOfStructures())
-                states.merge(n.getState(), 1, Integer::sum);
+                nbStates.merge(n.getState(), 1, Integer::sum);
         }
 
         if(!states.isEmpty())
@@ -71,7 +71,7 @@ public   class Growth {
         }
     }
 
-    private Random generator;
+
 
     public void shapeControlGrowth() {
         this.generator = new Random();
@@ -87,8 +87,7 @@ public   class Growth {
 
     public void checkNeighbourhoodMoore(Cell c) {
         shapeControlNeighbourhood(c);
-
-        HashMap<Integer, Integer> neighbourhoodStates = new HashMap<>();
+        HashMap<Integer, Integer> neighbourhoodStates  = new HashMap<>();
 
         for (Cell n : getMoore().getNeighbours())
         {
@@ -107,7 +106,8 @@ public   class Growth {
             if (maxForMoore.getValue() >= 5)
             {
                 c.setNextState(maxForMoore.getKey());
-            } else {
+            }
+            else {
 
                 HashMap.Entry<Integer, Integer> maxMoore = null;
                 neighbourhoodStates.clear();
@@ -126,11 +126,13 @@ public   class Growth {
                 {
                     c.setNextState(maxMoore.getKey());
                 }
-                else {
+                else
+                    {
 
                     neighbourhoodStates.clear();
                     maxMoore = null;
-                    for (Cell n : getFurtherMoore().getNeighbours()) {
+                    for (Cell n : getFurtherMoore().getNeighbours())
+                    {
 
                         if (n.getState() > 1 + Nucleons.getNumberOfStructures())
                             neighbourhoodStates.merge(n.getState(), 1, Integer::sum);
@@ -146,7 +148,7 @@ public   class Growth {
                         c.setNextState(maxMoore.getKey());
                     }
                     else
-                        {
+                    {
 
                         int random = generator.nextInt(100) + 1;
                         if (random <= probability) {

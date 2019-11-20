@@ -81,7 +81,7 @@ public class Nucleons {
     }
 
     public static int getNumberOfStructures() {
-        return numberOfStructures;
+        return numberOfSubstructures;
     }
 
     public static void setNumberOfStructures(int numberOfStructures) {

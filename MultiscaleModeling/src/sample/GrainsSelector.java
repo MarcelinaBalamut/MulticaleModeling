@@ -3,31 +3,31 @@ package sample;
 import javafx.scene.paint.Color;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GrainsSelector {
     private List<Cell> listOfSelected;
-    private Map<Integer, Color> listOfRemoved;
-
+    private Map<Integer, Color> removedColors;
 
     public GrainsSelector() {
        this.listOfSelected = new ArrayList<>();
-        listOfRemoved = new HashMap<>();
+        removedColors = new HashMap<>();
     }
 
-    public void selectGrain(int x, int y) {
+    public void select(int x, int y) {
 
         Grid grid = Nucleons.getGrid();
-
 
             int state = grid.getCell(x, y).getState();
 
             for (Cell cell : grid.getGrid()) {
-                if (cell.getState() == state) {
+                if (cell.getState() == state)
+                {
                     listOfSelected.add(cell);
+
                 }
             }
-            changeColorForSelectedGrain(state);
-
+            changeColorToSelected(state);
     }
 
     public void unselect(int x, int y) {
@@ -35,41 +35,75 @@ public class GrainsSelector {
 
             int state = grid.getCell(x, y).getState();
             listOfSelected.removeIf(cell -> cell.getState() == state);
-            changeColorForUnselectedGrains(state);
+            changeColorToUnSelected(state);
 
     }
 
-    public boolean checkIfSelected(int x, int y)  {
+    public boolean checkIfSelected(int x, int y) {
         Grid grid = Nucleons.getGrid();
         Cell cell = grid.getCell(x, y);
         return listOfSelected.contains(cell);
     }
 
-    public void unselectAll() {
-        listOfRemoved.forEach( (i, c) -> Nucleons.getGrainsColors().put(i, listOfRemoved.get(i)));
-        listOfSelected.clear();
-        listOfRemoved.clear();
-    }
-
-    private void changeColorForSelectedGrain(int state) {
-        listOfRemoved.put(state, Nucleons.getColorForGrain(state));
+    private void changeColorToSelected(int state) {
+        removedColors.put(state, Nucleons.getColorForGrain(state));
         Nucleons.getGrainsColors().put(state, Color.MAGENTA);
     }
 
-    private void changeColorForUnselectedGrains(int state) {
-        Nucleons.getGrainsColors().put(state, listOfRemoved.get(state));
-        listOfRemoved.remove(state);
+    private void changeColorToUnSelected(int state) {
+        Nucleons.getGrainsColors().put(state, removedColors.get(state));
+        removedColors.remove(state);
     }
 
-    public List<Cell> getListOfSelected() {
+    public List<Cell> getSelectedCells() {
         return listOfSelected;
     }
 
-    public ArrayList<Integer> getSelectedGrainsId() {
-        Set<Integer> selected = new HashSet<>();
+    public ArrayList<Integer> getListOfSelectedGrains() {
+        Set<Integer> set = new HashSet<>();
         for (Cell c : listOfSelected)
-            selected.add(c.getState());
-        return new ArrayList<>(selected);
+            set.add(c.getState());
+        return new ArrayList<>(set);
     }
 
+    public void selectAllGrains() {
+        List<Cell> gridWithUnselected = Nucleons.getGrid().getGrid().stream()
+                .filter(c -> !listOfSelected.contains(c)).collect(Collectors.toList());
+
+        for (Cell cell : gridWithUnselected) {
+            if (cell.getState() != 1 && cell.getState() != 0) {
+                listOfSelected.add(cell);
+                if (!removedColors.containsKey(cell.getState())) {
+                    changeColorToSelected(cell.getState());
+                }
+            }
+        }
+    }
+
+    public boolean checkIfAllSelected() {
+        List<Cell> grid = Nucleons.getGrid().getGrid();
+        Optional<Cell> empty = grid.stream().filter(cell -> cell.getState() != 0 &&
+                cell.getState() != 1 && !listOfSelected.contains(cell)).findAny();
+        return !empty.isPresent();
+    }
+
+    public void unselectAll() {
+        ArrayList<Integer> listOfSelectedGrains = new ArrayList<>();
+        for (Cell c: listOfSelected )
+        {
+            if (!listOfSelectedGrains.contains(c.getState()))
+            listOfSelectedGrains.add(c.getState());
+        }
+        Map<Integer, Color> colors = Nucleons.getGrainsColors();
+        removedColors.forEach(colors::put);
+        listOfSelected.clear();
+        removedColors.clear();
+    }
+
+    public void removeColorsGrains() {
+        List<Integer> states = new ArrayList<>();
+        states.addAll(removedColors.keySet());
+        Nucleons.getGrainsColors().keySet().removeIf(key -> key != 0 && key != 1 && !states.contains(key));
+
+    }
 }

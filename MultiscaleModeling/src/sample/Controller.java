@@ -40,13 +40,12 @@ public class Controller implements Initializable {
     public ComboBox structureTypeId;
     public Button chooseId;
 
-
     private int numberOfNucleon;
     private Set<Integer> randomCells = new HashSet<>();
-    int TOP_PADDING = 0;
-    boolean clearGrid = true;
-    private GrainsSelector grainsSelector = new GrainsSelector();
 
+    int padding = 0;
+    boolean clearGrid = true;
+    private GrainsSelector grainsSelector;
     boolean isClecable =  false;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -60,7 +59,7 @@ public class Controller implements Initializable {
         );
 
         neighborhood.getItems().addAll(
-                // "Moore",
+
                 "VonNeumann",
                 "Moore"
         );
@@ -73,12 +72,21 @@ public class Controller implements Initializable {
                  "Dual-Phase",
                 "Disable"
         );
+        borderSizeId.getItems().addAll(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+        );
     }
 
     public void evenlyRandom(MouseEvent mouseEvent) {
     }
 
     public void startButton(ActionEvent actionEvent) {
+
+
         String nb = neighborhood.getValue().toString();
 
         if (Nucleons.checkIfAnyEmptySpaces()) {
@@ -109,19 +117,25 @@ public class Controller implements Initializable {
 
     public void finalRand(ActionEvent actionEvent) {
 
-        if (Nucleons.getGrid() == null) {
+        if (Nucleons.getGrid() == null)
+        {
             gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
             prepareGrid();
         }
 
+        grainsSelector = new GrainsSelector();
         randomCells.clear();
         numberOfNucleon = Integer.parseInt(embryCount.getText());
         validateGrid();
         Nucleons.setNumberOfGrains(Nucleons.getNumberOfGrains() + numberOfNucleon);
-        colorGrains();
-        randNucleons(numberOfNucleon);
-        setState(numberOfNucleon);
-        print();
+            if (Nucleons.getGrainsColors() == null || Nucleons.getGrainsColors().size() == 0)
+                colorGrains();
+            else
+                colorGrains(numberOfNucleon);
+            randNucleons(numberOfNucleon);
+            setState(numberOfNucleon);
+            print();
+
     }
 
     public void stop(ActionEvent actionEvent) {
@@ -135,13 +149,13 @@ public class Controller implements Initializable {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
         print();
 
-
     }
 
     private void randNucleons(int nGrains) {
+
+
         if (Nucleons.checkIfAnyEmptySpaces()) {
             Random generator = new Random();
-
             for (int i = 0; i < nGrains; i++) {
                 int random = generator.nextInt(Nucleons.getGrid().getGrid().size());
                 if (this.randomCells.contains(random) || Nucleons.getGrid().getCellByPosition(random).getState()>0) {
@@ -149,10 +163,8 @@ public class Controller implements Initializable {
                 } else {
                     this.randomCells.add(random);
                 }
-
             }
         }
-
     }
 
     private void setState(int grainsNumber) {
@@ -171,7 +183,7 @@ public class Controller implements Initializable {
         grains.put(0, Color.WHITE);
         grains.put(1, Color.BLACK);
 
-        for (Integer i : grainsSelector.getSelectedGrainsId()){
+        for (Integer i : grainsSelector.getListOfSelectedGrains()){
             grains.put(i, Color.MAGENTA);
             gc.setFill(Color.MAGENTA);
         }
@@ -189,7 +201,21 @@ public class Controller implements Initializable {
         }
         Nucleons.setGrainsColors(grains);
     }
+    private void colorGrains(int numberOfNucleon) {
+        Map<Integer, Color> colors = Nucleons.getGrainsColors();
+        int colorSize = colors.size();
+        for (int i = colorSize; i < colorSize + numberOfNucleon; i++){
 
+
+            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) || colors.containsValue(color)) {
+                --i;
+                continue;
+            }
+
+            colors.put(i, color);
+
+        }
+    }
 
     private static void cleanNucleation() {
         Nucleons.getGrainsColors().keySet().removeIf(key -> !(key.equals(0)) && !(key.equals(1)));
@@ -215,33 +241,10 @@ public class Controller implements Initializable {
                     gc.setFill(Nucleons.getGrainsColors().get(c.getState()));
                 gc.fillRect(c.getX() * 2, 10 + c.getY() * 2, 2, 2);
 
-
             }
         }
     }
-    private void print2() {
-        if (Nucleons.getGrid() != null) {
-            for (Cell c : Nucleons.getGrid().getGrid()) {
-                if (c.getState() == 0) {
-                    gc.setFill(Color.WHITE);
-                } else if (c.getState() == 1) {
-                    gc.setFill(Color.BLACK);
-
-                } else if(grainsSelector.getSelectedGrainsId().contains(c.getState()) ) {
-                    gc.setFill(Color.MAGENTA);
-
-
-                }
-                else
-                    gc.setFill(Nucleons.getGrainsColors().get(c.getState()));
-                gc.fillRect(c.getX() * 2, 10 + c.getY() * 2, 2, 2);
-
-
-            }
-        }
-    }
-
-
+    
     private void prepareGrid() {
         int widthSize = Integer.parseInt(width.getText());
         int heightSize = Integer.parseInt(height.getText());
@@ -271,7 +274,6 @@ public class Controller implements Initializable {
         for (Cell c : Nucleons.getGrid().getGrid()) {
             c.setState(0);
             c.setNeighbourhood(null);
-
         }
     }
 
@@ -459,8 +461,6 @@ public class Controller implements Initializable {
             prepareGrid();
             addInclusions(actionEvent);
         }
-
-
         if (Nucleons.getNumberOfInclusions() != 0) {
             int inclusionSize = Integer.parseInt(inclusionSizeId.getText());
 
@@ -469,7 +469,10 @@ public class Controller implements Initializable {
             if (Nucleons.getNumberOfGrains() == 0)
                 inclusion.addInclusion(amountOfInclusion, inclusionSize, inclusionType);
             else
-                inclusion.addInclusionOnBoundaries(amountOfInclusion, inclusionSize, inclusionType);
+        } else {
+                inclusion.addInclusionOnBoundaries(inclusionNumber, inclusionSize, inclusionType);
+        } else {
+
         }
 
         print();
@@ -486,13 +489,12 @@ public class Controller implements Initializable {
     private void createSubstructure(ArrayList<Integer> listOfSelectedGrains) {
         deleteRestOfGrains(listOfSelectedGrains);
         Nucleons.setNumberOfGrains(listOfSelectedGrains.size());
-        growthForSubstructure();
     }
 
     private void createDualPhase(ArrayList<Integer> listOfSelectedGrains) {
         deleteRestOfGrains(listOfSelectedGrains);
         Nucleons.setNumberOfGrains(1);
-        growthForDualPhase();
+        
     }
 
     private void deleteRestOfGrains(ArrayList<Integer> listOfSelectedGrains) {
@@ -513,37 +515,37 @@ public class Controller implements Initializable {
 
         int id = 2;
         for (Cell cell : Nucleons.getGrid().getGrid()) {
-            if (cell.getState() != 0 && cell.getState() != 1)
-            {
+            if (cell.getState() != 0 && cell.getState() != 1) {
                 if (!colors.containsKey(cell.getState())) {
-                    grainColors.put(id, Nucleons.getColorForGrain(cell.getState()));
-                    colors.put(cell.getState(), id);
-                    id++;
+                    grainColors.put(n, Nucleons.getColorForGrain(cell.getState()));
+                    colors.put(cell.getState(), n);
+                    n++;
                 }
                 cell.setState(colors.get(cell.getState()));
             }
         }
-        Nucleons.setNumberOfStructures(id - 2);
+        Nucleons.setNumberOfSubstructures(n - 2);
         Nucleons.setGrainsColors(grainColors);
     }
 
     private void growthForDualPhase() {
+        boolean firstTemp = true;
         Map<Integer, Color> grainColors = new HashMap<>();
         grainColors.put(0, Color.WHITE);
-        grainColors.put(1, Color.BLACK);
+       grainColors.put(1, Color.BLACK);
 
-       int id=2;
-
+        int id = 2;
         for (Cell cell : Nucleons.getGrid().getGrid()) {
             if (cell.getState() != 0 && cell.getState() != 1) {
-
-                grainColors.put(id, Nucleons.getColorForGrain(cell.getState()));
-
+                if (firstTemp) {
+                    grainColors.put(id, Nucleons.getColorForGrain(cell.getState()));
+                    firstTemp = false;
+                }
                 cell.setState(id);
             }
         }
-        Nucleons.setNumberOfStructures(1);
-       Nucleons.setGrainsColors(grainColors);
+        Nucleons.setNumberOfSubstructures(1);
+        Nucleons.setGrainsColors(grainColors);
     }
 
 
@@ -557,7 +559,7 @@ public class Controller implements Initializable {
         if (structure!="Disable") {
 
                     int x = (int) mouseEvent.getX();
-                    int y = (int) (mouseEvent.getY() - TOP_PADDING);
+                    int y = (int) (mouseEvent.getY() - padding);
 
 
             double width = canvas.getGraphicsContext2D().getCanvas().getWidth() / 300;
@@ -581,15 +583,12 @@ public class Controller implements Initializable {
             int Xend = canvasX;
             int Yend = canvasY;
 
-
             x = Xend;
             y = Yend;
                     try {
-                        if (!grainsSelector.checkIfSelected(x, y))
-                        {
-                            grainsSelector.selectGrain(x, y);
-                        } else
-                            {
+                        if (!grainsSelector.checkIfSelected(x, y)) {
+                            grainsSelector.select(x, y);
+                        } else {
                             grainsSelector.unselect(x, y);
                         }
                        print();
@@ -613,22 +612,28 @@ public class Controller implements Initializable {
 
         String structure = structureTypeId.getValue().toString();
 
-         if(grainsSelector.getListOfSelected().isEmpty()) {
+         if(grainsSelector.getSelectedCells().isEmpty()) {
                     throw new NullPointerException();
                 }
                 if( structure =="Substructure") {
 
-                    createStructure(grainsSelector.getSelectedGrainsId(), true);
-
+                    createStructure(grainsSelector.getListOfSelectedGrains(), true);
+                    grainsSelector.removeColorsGrains();
+                    grainsSelector.unselectAll();
+                    growthForSubstructure();
                     isClecable = true;
+                    grainsSelector = null;
                     print();
                 }
                 else if( structure =="Dual-Phase"){
 
-                    createStructure(grainsSelector.getSelectedGrainsId(), false);
+                    createStructure(grainsSelector.getListOfSelectedGrains(), false);
+                    grainsSelector.removeColorsGrains();
+                    grainsSelector.unselectAll();
+                    growthForDualPhase();
 
                     isClecable = true;
-
+                    grainsSelector = null;
                     print();
                 }
 
@@ -637,5 +642,107 @@ public class Controller implements Initializable {
 
                 }
 
+    }
+
+    public void selectAllGrains(ActionEvent actionEvent) {
+
+        if (grainsSelector != null) {
+
+
+            if (!grainsSelector.checkIfAllSelected()) {
+                grainsSelector.selectAllGrains();
+            } else {
+                grainsSelector.unselectAll();
+            }
+            print();
+        }
+
+    }
+
+    public void drawBorders(ActionEvent actionEvent) {
+
+            if(!grainsSelector.getSelectedCells().isEmpty())
+            {
+            String borderSize = borderSizeId.getValue().toString();
+
+            borderCells = new ArrayList<>();
+            getBorders(grainsSelector.getSelectedCells(), Integer.parseInt(borderSize));
+            grainsSelector.unselectAll();
+            shapeControlId.setSelected(false);
+            grainsSelector = null;
+            print();
+            }
+    }
+
+    public void getBorders(List<Cell> selected, int size) {
+        for (Cell cell : selected) {
+            if (cell.getState() == 1 || cell.getState() == 0)
+                continue;
+            Neighbourhood neighbourhood = new Moore(cell);
+            for (Cell n : neighbourhood.getNeighbours() ) {
+                if ( n.getState() != cell.getState()) {
+                    borderCells.add(n);
+                    n.setState(1);
+                }
+            }
+        }
+        if (size > 0)
+            enlargeBoundaries(size);
+    }
+
+    public void cleareGrid(ActionEvent actionEvent) {
+        int counter = 0;
+        List<Cell> grid = Nucleons.getGrid().getGrid();
+        for (Cell cell : grid)
+        {
+            cell.setNextState(0);
+            if (cell.getState() != 1)
+            {
+                cell.setState(0);
+            }
+            if (cell.getState() == 1)
+            {
+                counter++;
+            }
+        }
+        print();
+        countPercentage(counter, grid);
+    }
+
+
+   public void countPercentage(int counter, List<Cell> grid){
+       double boundaryPercentage = ((double) counter) / grid.size() * 100;
+       System.out.println("Boundary cells percentage: " + boundaryPercentage + "%");
+    }
+
+    private List<Cell> largeInOne(List<Cell> borders, List<Cell> previous, int size) {
+        if (size > 0) {
+            Set<Cell> newNeighbourhood = new HashSet<>();
+
+            previous.forEach( i ->
+                    newNeighbourhood.addAll(new Moore(i).getNeighbours().stream().filter(
+                            neighbourCell -> !borders.contains(neighbourCell)).collect(Collectors.toList())));
+
+            newNeighbourhood.forEach(c -> c.setState(1));
+
+            borders.addAll(newNeighbourhood);
+            return largeInOne(borders, new ArrayList<>(newNeighbourhood), --size);
+        }
+        else {
+            return borders;
+        }
+
+    }
+
+    private void enlargeBoundaries(int size) {
+        List<Cell> borders = new ArrayList<>();
+
+        borders.addAll(Nucleons.getGrid().getGrid().stream().filter(cell -> cell.getState() == 1).collect(Collectors.toList()));
+
+        for (Cell cell : borderCells) {
+            List<Cell> root = new ArrayList<>();
+            root.add(cell);
+            largeInOne(borders, root, size);
+        }
     }
 }

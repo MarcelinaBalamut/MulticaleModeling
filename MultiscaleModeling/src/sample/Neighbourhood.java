@@ -9,7 +9,7 @@ public abstract class Neighbourhood {
     protected abstract void neighbours(Cell cell);
 
 
-    protected void addCell(Cell cell){
+    protected void addCellList(Cell cell){
         if (cell != null){
             this.neighbours.add(cell);
         }

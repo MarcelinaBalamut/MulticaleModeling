@@ -13,10 +13,10 @@ public class FurtherMoore extends Neighbourhood {
         int cx = cell.getX();
         int cy = cell.getY();
 
-        super.addCell(grid.getCell(cx - 1, cy - 1) );
-        super.addCell(grid.getCell(cx + 1, cy - 1) );
-        super.addCell(grid.getCell(cx - 1, cy + 1) );
-        super.addCell(grid.getCell(cx + 1, cy + 1) );
+        super.addCellList(grid.getCell(cx - 1, cy - 1) );
+        super.addCellList(grid.getCell(cx + 1, cy - 1) );
+        super.addCellList(grid.getCell(cx - 1, cy + 1) );
+        super.addCellList(grid.getCell(cx + 1, cy + 1) );
 
     }
 }
