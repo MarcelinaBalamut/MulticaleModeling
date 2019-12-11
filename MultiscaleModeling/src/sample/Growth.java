@@ -34,26 +34,36 @@ public   class Growth {
             {
                 if (c.getState() == 0)
                 {
-                    isEmpty = true;
-                    if(shapeControl && nb=="Moore")
-                        checkNeighbourhoodMoore(c);
-                    else
-                        checkNeighbourhood(c);
-                    temp.add(c);
+                    //isEmpty = true;
+
+                    if(shapeControl && nb=="Moore"){
+                        if(checkNeighbourhoodMoore(c))
+                            temp.add(c);
+
+                    }
+
+                    else{
+                        if(checkNeighbourhood(c))
+                        temp.add(c);
+                }
+
                 }
             }
-            for (Cell c : temp)
-            {
-                c.setState(c.getNextState());
+            for (Cell c : temp) {
+                if (!temp.isEmpty()) {
+                    isEmpty = true;
+                    c.setState(c.getNextState());
+                }
             }
         }
     }
 
-    private void checkNeighbourhood(Cell c) {
+    private boolean checkNeighbourhood(Cell c) {
 
         List<Cell> neighbours = c.getNeighbourhood().getNeighbours();
         HashMap<Integer, Integer> states = new HashMap<>();
 
+        boolean changedCell = false;
         for (Cell n : neighbours)
         {
             if (n.getState() > 1 + Nucleons.getNumberOfStructures())
@@ -68,7 +78,9 @@ public   class Growth {
                     maxEntry = entry;
             }
             c.setNextState(maxEntry.getKey());
+            changedCell = true;
         }
+        return changedCell;
     }
 
 
@@ -85,7 +97,7 @@ public   class Growth {
     }
 
 
-    public void checkNeighbourhoodMoore(Cell c) {
+    public boolean checkNeighbourhoodMoore(Cell c) {
         shapeControlNeighbourhood(c);
         HashMap<Integer, Integer> neighbourhoodStates  = new HashMap<>();
 
@@ -158,6 +170,7 @@ public   class Growth {
                 }
             }
         }
+        return true;
     }
     public void shapeControlNeighbourhood(Cell cell) {
         moore = new Moore(cell);

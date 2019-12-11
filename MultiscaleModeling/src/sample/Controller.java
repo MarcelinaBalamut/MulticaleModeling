@@ -40,6 +40,9 @@ public class Controller implements Initializable {
     public ComboBox structureTypeId;
     public Button chooseId;
     public ComboBox borderSizeId;
+    public RadioButton monteCarloId;
+    public TextField stepsId;
+    public TextField coefficientId;
 
     private int numberOfNucleon;
     private Set<Integer> randomCells = new HashSet<>();
@@ -119,17 +122,20 @@ public class Controller implements Initializable {
 
     public void finalRand(ActionEvent actionEvent) {
 
-        if (Nucleons.getGrid() == null)
-        {
-            gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-            prepareGrid();
-        }
-
-        grainsSelector = new GrainsSelector();
-        randomCells.clear();
         numberOfNucleon = Integer.parseInt(embryCount.getText());
-        validateGrid();
-        Nucleons.setNumberOfGrains(Nucleons.getNumberOfGrains() + numberOfNucleon);
+        if(!monteCarloId.isSelected()) {
+
+
+            if (Nucleons.getGrid() == null) {
+                gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+                prepareGrid();
+            }
+
+            grainsSelector = new GrainsSelector();
+            randomCells.clear();
+
+            validateGrid();
+            Nucleons.setNumberOfGrains(Nucleons.getNumberOfGrains() + numberOfNucleon);
             if (Nucleons.getGrainsColors() == null || Nucleons.getGrainsColors().size() == 0)
                 colorGrains();
             else
@@ -137,7 +143,48 @@ public class Controller implements Initializable {
             randNucleons(numberOfNucleon);
             setState(numberOfNucleon);
             print();
+        }
+        else{
 
+
+
+                if (Nucleons.getGrid() == null) {
+                    gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+                    prepareGrid();
+                }
+            grainsSelector = new GrainsSelector();
+                int numberOfGrains = Integer.parseInt(embryCount.getText());
+                if (numberOfGrains < 2)
+                    throw new IllegalArgumentException("Type more grains");
+                if (numberOfGrains > Nucleons.getGrid().getGrid().size())
+                    throw new IllegalArgumentException("Type less grains!");
+
+                int steps = Integer.parseInt(stepsId.getText());
+                if (steps < 1)
+                    throw new IllegalArgumentException("Type more steps");
+
+                float coeff = Float.parseFloat(coefficientId.getText());
+                if (coeff < 0.1)
+                    throw new IllegalArgumentException("Type greater coefficient");
+                else if(coeff > 1.0)
+                    throw new IllegalArgumentException("The maximum value of J is 1");
+
+                Nucleons.setNumberOfGrains(Nucleons.getNumberOfGrains() + numberOfGrains);
+                if (Nucleons.getGrainsColors() == null || Nucleons.getGrainsColors().size() == 0)
+                   colorGrains();
+                else
+                    colorGrains(numberOfGrains);
+
+                MonteCarlo growth = new MonteCarlo(numberOfGrains, coeff, steps);
+                growth.growGrains("Moore");
+
+                print();
+
+
+
+
+
+        }
     }
 
     public void stop(ActionEvent actionEvent) {
@@ -169,6 +216,7 @@ public class Controller implements Initializable {
         }
     }
 
+
     private void setState(int grainsNumber) {
         Iterator<Integer> iterator = randomCells.iterator();
         int id = 2 + (Nucleons.getNumberOfGrains() - grainsNumber);
@@ -185,10 +233,6 @@ public class Controller implements Initializable {
         grains.put(0, Color.WHITE);
         grains.put(1, Color.BLACK);
 
-        for (Integer i : grainsSelector.getListOfSelectedGrains()){
-            grains.put(i, Color.MAGENTA);
-            gc.setFill(Color.MAGENTA);
-        }
         for (int i = 2; i <= Nucleons.getNumberOfGrains() + 1; i++) {
 
             Color color = Color.color(Math.random(), Math.random(), Math.random());
@@ -207,6 +251,7 @@ public class Controller implements Initializable {
         Map<Integer, Color> colors = Nucleons.getGrainsColors();
         int colorSize = colors.size();
         for (int i = colorSize; i < colorSize + numberOfNucleon; i++){
+
 
             Color color = Color.color(Math.random(), Math.random(), Math.random());
             if (colors.equals(Color.WHITE) || colors.equals(Color.BLACK) || colors.equals(Color.MAGENTA) || colors.containsValue(colors)) {
@@ -230,7 +275,6 @@ public class Controller implements Initializable {
 
         });
     }
-
     private void print() {
         if (Nucleons.getGrid() != null) {
             for (Cell c : Nucleons.getGrid().getGrid()) {
@@ -241,7 +285,7 @@ public class Controller implements Initializable {
                 }
                 else
                     gc.setFill(Nucleons.getGrainsColors().get(c.getState()));
-                gc.fillRect(c.getX() * 2, 10 + c.getY() * 2, 2, 2);
+                gc.fillRect(c.getX() * 2, padding + c.getY() * 2, 2, 2);
 
             }
         }
@@ -559,9 +603,10 @@ public class Controller implements Initializable {
                     int x = (int) mouseEvent.getX();
                     int y = (int) (mouseEvent.getY() - padding);
 
-
-            double width = canvas.getGraphicsContext2D().getCanvas().getWidth() / 300;
-            double height = canvas.getGraphicsContext2D().getCanvas().getHeight() / 300;
+int widthInput =  Integer.parseInt(width.getText());
+int heightInput =  Integer.parseInt(height.getText());
+            double width = canvas.getGraphicsContext2D().getCanvas().getWidth() / widthInput;
+            double height = canvas.getGraphicsContext2D().getCanvas().getHeight() / heightInput;
             x = (int) ((x / width) *width);
             y = (int) ((y / height) *height);
 
