@@ -19,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -43,6 +44,16 @@ public class Controller implements Initializable {
     public RadioButton monteCarloId;
     public TextField stepsId;
     public TextField coefficientId;
+    public ComboBox energyDistributionId;
+    public TextField energyInsideFieldId;
+    public TextField energyThresholdId;
+    public TextField energyEdgesId;
+    public ComboBox nucleationLocationId;
+    public TextField nucleationAmountId;
+    public ComboBox nucleationTypeId;
+    public TextField MCSRXStepsId;
+    public Button energyDistributionButton;
+    public Button growthSRXButton;
 
     private int numberOfNucleon;
     private Set<Integer> randomCells = new HashSet<>();
@@ -51,6 +62,13 @@ public class Controller implements Initializable {
     boolean clearGrid = true;
     private GrainsSelector grainsSelector;
     boolean isClecable =  false;
+    public final int SCALE = 1;
+
+    private final float MIN_HUE = 135f/360;
+    private final float MAX_HUE = 225f/360;
+
+    private float min;
+    private float max;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         clearGrid = true;
@@ -84,6 +102,23 @@ public class Controller implements Initializable {
                 "3",
                 "4"
         );
+        energyDistributionId.getItems().addAll(
+                "Homogenous",
+                "Heterogenous"
+
+        );
+        nucleationTypeId.getItems().addAll(
+                "Constant",
+                "Increasing",
+                "At the beginning"
+
+        );
+        nucleationLocationId.getItems().addAll(
+                "Anywhere",
+                "On boundaries"
+
+        );
+
     }
 
     public void evenlyRandom(MouseEvent mouseEvent) {
@@ -234,10 +269,19 @@ public class Controller implements Initializable {
         grains.put(1, Color.BLACK);
 
         for (int i = 2; i <= Nucleons.getNumberOfGrains() + 1; i++) {
+            double r = Math.random();
+            double gg =  Math.random();
+            double b =  Math.random();
 
-            Color color = Color.color(Math.random(), Math.random(), Math.random());
+            Color color = Color.color(r, gg,b);
 
-            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) || grains.containsValue(color)) {
+            Color rr = Color.hsb(r,gg,b);
+//            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) || grains.containsValue(color)) {
+//                --i;
+//                continue;
+//            }
+            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) ||
+                    rr.getRed() >= (float)330/360 || rr.getRed() <= (float)30/360 || grains.containsValue(color)) {
                 --i;
                 continue;
             }
@@ -252,18 +296,25 @@ public class Controller implements Initializable {
         int colorSize = colors.size();
         for (int i = colorSize; i < colorSize + numberOfNucleon; i++){
 
+            double r = Math.random();
+            double gg =  Math.random();
+            double b =  Math.random();
 
-            Color color = Color.color(Math.random(), Math.random(), Math.random());
-            if (colors.equals(Color.WHITE) || colors.equals(Color.BLACK) || colors.equals(Color.MAGENTA) || colors.containsValue(colors)) {
+            Color color = Color.color(r, gg,b);
+
+            Color rr = Color.hsb(r,gg,b);
+//            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) || colorsMap.containsValue(color)) {
+//                --i;
+//                continue;
+//            }
+            if (color.equals(Color.WHITE) || color.equals(Color.BLACK) || color.equals(Color.MAGENTA) ||
+                    rr.getRed() >= (float)330/360 || rr.getRed()  <= (float)30/360 || colors.containsValue(color)) {
                 --i;
                 continue;
             }
-
             colors.put(i, color);
-
         }
     }
-
     private static void cleanNucleation() {
         Nucleons.getGrainsColors().keySet().removeIf(key -> !(key.equals(0)) && !(key.equals(1)));
         Nucleons.setNumberOfGrains(0);
@@ -787,5 +838,70 @@ int heightInput =  Integer.parseInt(height.getText());
             root.add(cell);
             largeInOne(borders, root, size);
         }
+    }
+    public List<Cell> getBorderCells() {
+        return borderCells;
+    }
+
+    public void printEnergy() {
+        min = 0f;
+        max = 16f;
+        paintEnergy();
+    }
+
+
+    protected void paintEnergy() {
+
+
+        if (Nucleons.getGrid() != null) {
+            for (Cell c : Nucleons.getGrid().getGrid()) {
+                if (c.getState() == 0) {
+                    gc.setFill(Color.WHITE);
+                } else if (c.getState() == 1) {
+                    gc.setFill(Color.BLACK);
+                }
+                else{
+                    gc.setFill(calculateColourForEnergy(c.getEnergy()));
+
+                }
+                gc.fillRect(c.getX() * 2, padding + c.getY() * 2, 2, 2);
+
+            }
+        }
+
+    }
+
+    private Color calculateColourForEnergy(float energy) {
+        float value = 1 - (energy - min) / (max - min);
+//        float color = value* MAX_HUE + (1-value)* MIN_HUE;
+        return (Color.color(value, 0.5, 0.8f));
+    }
+
+    public void growthSRX(ActionEvent actionEvent) {
+            int numberOfNucleons = Integer.parseInt(nucleationAmountId.getText());
+            String type = (String) nucleationTypeId.getValue();
+            String location = (String) nucleationLocationId.getValue();
+            int steps = Integer.parseInt(MCSRXStepsId.getText());
+            float coefficient = Float.parseFloat(coefficientId.getText());
+
+            SRXMC srxmc = new SRXMC(type, location, numberOfNucleons, coefficient, steps);
+            srxmc.growGrains("Moore");
+
+            print();
+    }
+
+    public void energyDistribution(ActionEvent actionEvent) {
+
+            float insideEnergy = Float.parseFloat(energyInsideFieldId.getText());
+            float borderEnergy = insideEnergy;
+            if (energyDistributionId.getValue() == "Heterogenous") {
+                borderEnergy = Float.parseFloat(energyEdgesId.getText());
+            }
+            int threshold = Integer.parseInt(energyThresholdId.getText());
+            SRXMC.distributeEnergy(insideEnergy, borderEnergy, threshold);
+            printEnergy();
+
+
+
     }
 }

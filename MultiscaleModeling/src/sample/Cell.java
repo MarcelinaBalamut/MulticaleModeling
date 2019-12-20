@@ -8,6 +8,9 @@ public class Cell {
     private Neighbourhood neighbourhood;
     private int id;
 
+    private float energy;
+    private boolean recrystallized;
+
     public Cell(int x, int y) {
         this.x = x;
         this.y = y;
@@ -51,5 +54,21 @@ public class Cell {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public float getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(float energy) {
+        this.energy = energy;
+    }
+
+    public boolean isRecrystallized() {
+        return recrystallized;
+    }
+
+    public void setRecrystallized(boolean recrystallized) {
+        this.recrystallized = recrystallized;
     }
 }

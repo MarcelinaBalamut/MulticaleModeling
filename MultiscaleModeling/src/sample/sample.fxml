@@ -81,10 +81,25 @@
         <ComboBox fx:id="neighborhood" layoutX="14.0" layoutY="14.0" prefHeight="31" prefWidth="172.0" promptText="Neighborhood" />
         <TextField fx:id="height" layoutX="1063.0" layoutY="46.0" text="300" />
         <Label layoutX="1063.0" layoutY="14.0" text="Width" />
-      <TextField fx:id="stepsId" layoutX="1382.0" layoutY="46.0" />
-      <TextField fx:id="coefficientId" layoutX="1382.0" layoutY="102.0" />
-      <Label layoutX="1382.0" layoutY="14.0" text="Monte Carlo steps" />
-      <Label layoutX="1382.0" layoutY="77.0" text="Coefficient J" />
+      <TextField fx:id="stepsId" layoutX="1315.0" layoutY="46.0" />
+      <TextField fx:id="coefficientId" layoutX="1315.0" layoutY="102.0" />
+      <Label layoutX="1315.0" layoutY="14.0" text="Monte Carlo steps" />
+      <Label layoutX="1315.0" layoutY="77.0" text="Coefficient J" />
+      <ComboBox fx:id="energyDistributionId" layoutX="1315.0" layoutY="149.0" prefHeight="31.0" prefWidth="187.0" promptText="Energy distribution " />
+      <TextField fx:id="energyInsideFieldId" layoutX="1315.0" layoutY="204.0" />
+      <TextField fx:id="energyEdgesId" layoutX="1315.0" layoutY="264.0" />
+      <TextField fx:id="energyThresholdId" layoutX="1315.0" layoutY="317.0" />
+      <Label layoutX="1315.0" layoutY="180.0" text="Energy inside " />
+      <Label layoutX="1315.0" layoutY="235.0" text="Energy Edges" />
+      <Label layoutX="1315.0" layoutY="295.0" text="Energy treshold" />
+      <ComboBox fx:id="nucleationLocationId" layoutX="1315.0" layoutY="364.0" prefHeight="31.0" prefWidth="187.0" promptText="Nucleation location" />
+      <ComboBox fx:id="nucleationTypeId" layoutX="1315.0" layoutY="406.0" prefHeight="31.0" prefWidth="186.0" promptText="Nucleation type" />
+      <TextField fx:id="nucleationAmountId" layoutX="1315.0" layoutY="461.0" />
+      <Label layoutX="1315.0" layoutY="437.0" text="Nucleation amount" />
+      <Button fx:id="growthSRXButton" layoutX="1315.0" layoutY="504.0" mnemonicParsing="false" onAction="#growthSRX" text="Growth SRX" />
+      <Button fx:id="energyDistributionButton" layoutX="1315.0" layoutY="545.0" mnemonicParsing="false" onAction="#energyDistribution" text="Energy distribution" />
+      <TextField fx:id="MCSRXStepsId" layoutX="1310.0" layoutY="612.0" />
+      <Label layoutX="1310.0" layoutY="591.0" text="Monte Carlo SRX steps" />
 
 
     </children>
